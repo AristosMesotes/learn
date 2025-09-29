@@ -18,8 +18,7 @@ from learn.thought import IThought, TextThought
 _REGISTRY = {
     "tools": [],
     "boxes": [],
-    "brains": [],
-    "platforms": []
+    "brains": []
 }
 
 # --- Decorators ---
@@ -45,14 +44,6 @@ def brain(mind_types: List[str]):
         _REGISTRY["brains"].append({"mind_types": mind_types, "func": func})
         return func
     return decorator
-
-def platform(mind_types: List[str]):
-    """Decorator to register a platform configuration function for specific mind types."""
-    def decorator(func: Callable):
-        _REGISTRY["platforms"].append({"mind_types": mind_types, "func": func})
-        return func
-    return decorator
-
 
 # --- API Client ---
 class NodeAIClient:
@@ -140,8 +131,7 @@ class NodeAIClient:
                     if agent_key not in configs_by_agent:
                         configs_by_agent[agent_key] = {
                             "tools_payload": {"tools": [], "boxes": {}, "boxes_code": []},
-                            "brain_payload": {},
-                            "platform_payload": {}
+                            "brain_payload": {}
                         }
                     
                     if item_type == "tools":
@@ -161,21 +151,6 @@ class NodeAIClient:
                             configs_by_agent[agent_key]["brain_payload"] = brain_config.dict()
                         else:
                             configs_by_agent[agent_key]["brain_payload"] = brain_config
-
-                    elif item_type == "platforms":
-                        platform_config = item["func"]()
-                        # Handle both dict and object returns
-                        if hasattr(platform_config, 'dict'):
-                            platform_data = platform_config.dict()
-                            configs_by_agent[agent_key]["platform_payload"] = {
-                                "platform_type": platform_data.get("type", platform_data.get("platform_type")),
-                                "platform_configs": platform_data.get("cfg", platform_data.get("platform_configs", {}))
-                            }
-                        else:
-                            configs_by_agent[agent_key]["platform_payload"] = {
-                                "platform_type": platform_config.get("type", platform_config.get("platform_type")),
-                                "platform_configs": platform_config.get("cfg", platform_config.get("platform_configs", {}))
-                            }
         
         # Deploy each agent's configuration
         for agent_key, payloads in configs_by_agent.items():
@@ -193,12 +168,6 @@ class NodeAIClient:
                 self._save_json(agent_key, "Brain/main.json", payloads["brain_payload"])
                 print(f"  ✅ Brain for '{agent_key}' deployed.")
 
-            # Save main.json for platform
-            if payloads["platform_payload"]:
-                print(f"  🔌 Saving Platform/main.json...")
-                self._save_json(agent_key, "Platform/main.json", payloads["platform_payload"])
-                print(f"  ✅ Platform for '{agent_key}' deployed.")
-
         print("\n🚀 Deployment complete!")
         print(f"   Deployed {len(configs_by_agent)} agent type(s) to {self.base_url}")
 
@@ -208,8 +177,7 @@ class NodeAIClient:
         _REGISTRY = {
             "tools": [],
             "boxes": [],
-            "brains": [],
-            "platforms": []
+            "brains": []
         }
         print("🧹 Registry cleared.")
 
@@ -302,8 +270,7 @@ def get_registry_summary() -> Dict[str, int]:
     return {
         "tools": len(_REGISTRY["tools"]),
         "boxes": len(_REGISTRY["boxes"]),
-        "brains": len(_REGISTRY["brains"]),
-        "platforms": len(_REGISTRY["platforms"])
+        "brains": len(_REGISTRY["brains"])
     }
 
 def reset_registry():
@@ -312,6 +279,5 @@ def reset_registry():
     _REGISTRY = {
         "tools": [],
         "boxes": [],
-        "brains": [],
-        "platforms": []
+        "brains": []
     }

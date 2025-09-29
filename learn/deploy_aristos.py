@@ -9,7 +9,7 @@ Key fixes:
 """
 
 from pydantic import BaseModel
-from learn.nodeai_deployer import NodeAIClient, tool, box, brain, platform
+from learn.nodeai_deployer import NodeAIClient, tool, box, brain
 
 # --- Agent Configuration ---
 AGENT_TYPE = "Human"
@@ -110,16 +110,6 @@ def aristos_brain():
         ]
     }
 
-# --- Platform Configuration ---
-
-@platform([AGENT_TYPE])
-def aristos_platform():
-    """Configure platform for Aristotle - using console for testing."""
-    return {
-        "platform_type": "ConsolePlatform",
-        "platform_configs": {}
-    }
-
 # --- Deployment Script ---
 #!/usr/bin/env python
 
@@ -142,7 +132,6 @@ if __name__ == "__main__":
     print(f"   Tools: {summary['tools']}")
     print(f"   Boxes: {summary['boxes']}")
     print(f"   Brains: {summary['brains']}")
-    print(f"   Platforms: {summary['platforms']}")
     
     # 3. Debug: Print actual tool code
     print("\n🔍 Tool Code to Deploy:")
