@@ -120,28 +120,10 @@ if __name__ == "__main__":
     # The fix: Deploy to "Agents" world where the server actually looks!
     client = NodeAIClient(
         base_url="https://pfm-ngrok-app.ngrok.app",
-        account="leech", 
         account="500 B.C.",
         world="Greece"  # ← THIS IS THE FIX! Was "Ancient Greece"
     )
-    
-    # 2. Debug: Show what will be deployed
-    from learn.nodeai_deployer import get_registry_summary, _REGISTRY
-    summary = get_registry_summary()
-    print(f"\n📋 Registry Summary:")
-    print(f"   Tools: {summary['tools']}")
-    print(f"   Boxes: {summary['boxes']}")
-    print(f"   Brains: {summary['brains']}")
-    
-    # 3. Debug: Print actual tool code
-    print("\n🔍 Tool Code to Deploy:")
-    for tool_item in _REGISTRY["tools"]:
-        func = tool_item["func"]
-        code = NodeAIClient._get_source_code(func)
-        print(f"\n--- {func.__name__} ---")
-        print(code)
-        print("--- end ---")
-    
+
     # 4. Deploy
     try:
         print("\n📦 Deploying...")

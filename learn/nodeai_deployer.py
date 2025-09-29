@@ -49,7 +49,7 @@ def brain(mind_types: List[str]):
 class NodeAIClient:
     """A client to interact with the NodeAI remote server."""
     
-    def __init__(self, base_url: str, account: str, account: str, world: str):
+    def __init__(self, base_url: str, account: str, world: str):
         """
         Initialize the NodeAI deployment client.
         
@@ -60,7 +60,6 @@ class NodeAIClient:
             world: The world this agent belongs to (e.g., "MyWorld")
         """
         self.base_url = base_url.rstrip('/')
-        self.account = account
         self.account = account
         self.world = world
         self.headers = {"Content-Type": "application/json", "x-auth-user": self.account}
@@ -261,23 +260,3 @@ class _RemoteMindProxy:
             return TextThought(content="<No response from server>", role="error")
         
         return responses[0]
-
-
-# --- Utility Functions ---
-
-def get_registry_summary() -> Dict[str, int]:
-    """Get a summary of what's currently in the registry."""
-    return {
-        "tools": len(_REGISTRY["tools"]),
-        "boxes": len(_REGISTRY["boxes"]),
-        "brains": len(_REGISTRY["brains"])
-    }
-
-def reset_registry():
-    """Reset the global registry to empty state."""
-    global _REGISTRY
-    _REGISTRY = {
-        "tools": [],
-        "boxes": [],
-        "brains": []
-    }
