@@ -102,26 +102,29 @@ class JSPythonConverter:
         # Step 3: Convert class definitions
         python_code = self._convert_classes(python_code)
         
-        # Step 4: Convert common methods and properties FIRST (before variables)
-        python_code = self._convert_common_methods(python_code)
-        
-        # Step 5: Convert array methods (before variables mess with the patterns)
+        # Step 4: Convert array methods FIRST (before variables mess with the patterns)
         python_code = self._convert_array_methods(python_code)
         
-        # Step 6: Convert variable declarations
+        # Step 5: Convert variable declarations
         python_code = self._convert_variables(python_code)
         
-        # Step 7: Convert control structures
+        # Step 6: Convert control structures
         python_code = self._convert_control_structures(python_code)
         
-        # Step 8: Convert object literals
+        # Step 7: Convert object literals
         python_code = self._convert_objects(python_code)
+        
+        # Step 8: Convert common methods and properties
+        python_code = self._convert_common_methods(python_code)
         
         # Step 9: Convert operators
         python_code = self._convert_operators(python_code)
         
         # Step 10: Clean up and format
         python_code = self._cleanup_code(python_code)
+        
+        # Step 11: Post-processing to fix common issues
+        python_code = self._post_process(python_code)
         
         # Add necessary imports
         imports = self._generate_imports(python_code)
@@ -558,7 +561,6 @@ class JSPythonConverter:
         
         # Replace methods but be careful not to replace variable names
         for js_method, py_method in self.method_map.items():
-            # Use word boundary to avoid replacing parts of variable names
             # Skip if it's already been modified (e.g., Math.max_var)
             if not re.search(rf'\b{re.escape(js_method)}_var\b', code):
                 code = re.sub(rf'\b{re.escape(js_method)}\b', py_method, code)
@@ -634,6 +636,9 @@ class JSPythonConverter:
     
     def _cleanup_code(self, code: str) -> str:
         """Clean up the converted code."""
+        # Convert JS comments that weren't handled
+        code = re.sub(r'//\s*(.*)', r'# \1', code)
+        
         # Remove remaining braces (but preserve dictionary braces)
         # Only remove standalone braces on their own lines
         lines = code.split('\n')
@@ -655,6 +660,9 @@ class JSPythonConverter:
         
         # Remove semicolons
         code = code.replace(';', '')
+        
+        # Fix missing colons in if/for/while statements
+        code = re.sub(r'(if|for|while)\s+(.+)\s*\n', r'\1 \2:\n', code)
         
         # Fix indentation (simplified - assumes 4 spaces)
         lines = code.split('\n')
@@ -679,12 +687,34 @@ class JSPythonConverter:
             # Add indented line
             cleaned_lines.append('    ' * indent_level + stripped)
             
-            # Increase indent after colons
-            if stripped.endswith(':'):
+            # Increase indent after colons that aren't in strings or comments
+            if stripped.endswith(':') and not (stripped.endswith('":') or stripped.endswith("':") or stripped.startswith('#')):
                 indent_level += 1
-            # Don't decrease indent after return statements - they might be in the middle of a function
+            # Keep proper indentation after returns that aren't the end of a function
                 
         return '\n'.join(cleaned_lines)
+    
+    def _post_process(self, python_code: str) -> str:
+        """Additional post-processing steps to fix common conversion issues."""
+        # Fix JavaScript-style comments that weren't converted
+        python_code = re.sub(r'//\s*(.*)', r'# \1', python_code)
+        
+        # Fix missing colons in if/for/while statements
+        python_code = re.sub(r'(if|for|while)\s+([^:]+)\s*(?<!\:)$', r'\1 \2:', python_code, flags=re.MULTILINE)
+        
+        # Add missing pass statement to empty blocks
+        python_code = re.sub(r'(\w+):\s*\n\s*\n', r'\1:\n    pass\n\n', python_code)
+        
+        # Fix indentation issues with return statements
+        lines = python_code.split('\n')
+        for i in range(len(lines)-1):
+            if lines[i].strip().startswith('return ') and not lines[i+1].strip().startswith(('elif', 'else', 'except', 'finally')):
+                # Make sure there's no indent change after return unless it's followed by control flow
+                if i < len(lines)-2 and lines[i+1].strip() and not lines[i+1].startswith(' '):
+                    indent_level = len(lines[i]) - len(lines[i].lstrip())
+                    lines[i+1] = ' ' * indent_level + lines[i+1].lstrip()
+        
+        return '\n'.join(lines)
     
     def _generate_imports(self, code: str) -> str:
         """Generate necessary Python imports based on the converted code."""
