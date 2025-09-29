@@ -120,7 +120,7 @@ if __name__ == "__main__":
     # The fix: Deploy to "Agents" world where the server actually looks!
     client = NodeAIClient(
         base_url="https://pfm-ngrok-app.ngrok.app",
-        username="leech", 
+        account="leech", 
         account="500 B.C.",
         world="Greece"  # ← THIS IS THE FIX! Was "Ancient Greece"
     )

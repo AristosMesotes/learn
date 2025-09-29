@@ -49,21 +49,21 @@ def brain(mind_types: List[str]):
 class NodeAIClient:
     """A client to interact with the NodeAI remote server."""
     
-    def __init__(self, base_url: str, username: str, account: str, world: str):
+    def __init__(self, base_url: str, account: str, account: str, world: str):
         """
         Initialize the NodeAI deployment client.
         
         Args:
             base_url: The base URL of your NodeAI server (e.g., "http://127.0.0.1:8080")
-            username: Your username for authentication
+            account: Your account for authentication
             account: The account/namespace for storage (e.g., "MyAccount")
             world: The world this agent belongs to (e.g., "MyWorld")
         """
         self.base_url = base_url.rstrip('/')
-        self.username = username
+        self.account = account
         self.account = account
         self.world = world
-        self.headers = {"Content-Type": "application/json", "x-auth-user": self.username}
+        self.headers = {"Content-Type": "application/json", "x-auth-user": self.account}
 
     def configure_storage(self):
         """Sets up the storage configuration for the user on the server."""
@@ -77,7 +77,7 @@ class NodeAIClient:
 
     def _save_json(self, agent_key: str, file_name: str, content: Dict[str, Any]):
         """Saves a JSON file to the agent's collective storage."""
-        url = f"{self.base_url}/api/storage/agent/{self.username}/{self.world}/{agent_key}/_collective/set"
+        url = f"{self.base_url}/api/storage/agent/{self.account}/{self.world}/{agent_key}/_collective/set"
         
         # Convert content to JSON string before sending - MATCHING FRONTEND BEHAVIOR
         payload = {
